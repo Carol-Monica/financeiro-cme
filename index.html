@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CME — Dashboard Financeiro</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1A1A2E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CME Financeiro">
+<link rel="apple-touch-icon" href="icon-192.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -184,9 +192,50 @@ tbody td{padding:11px 0;font-size:12.5px;color:#333}
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#DDD;border-radius:10px}
+
+/* ── HAMBURGER ── */
+.hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;width:38px;height:38px;background:#fff;border:none;border-radius:11px;cursor:pointer;padding:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);flex-shrink:0}
+.hamburger span{display:block;height:2px;background:#1A1A2E;border-radius:2px;transition:.25s}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* ── SIDEBAR OVERLAY ── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99;backdrop-filter:blur(2px)}
+.sidebar-overlay.open{display:block}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .hamburger{display:flex}
+  .sidebar{transform:translateX(-100%);transition:transform .28s ease;z-index:100;border-radius:0 24px 24px 0}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;padding:18px 14px}
+  .hdr{gap:10px}
+  .hdr-left h2{font-size:16px}
+  .hdr-right{gap:8px}
+  .month-sel{padding:6px 10px;font-size:12px}
+  .btn-sync{padding:6px 11px;font-size:11.5px}
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:11px}
+  .kpi{padding:15px 13px}
+  .kpi-val{font-size:18px}
+  .grid-6-4{grid-template-columns:1fr;gap:14px}
+  .grid-2{grid-template-columns:1fr;gap:14px}
+  .modal{width:94vw;padding:22px 18px}
+  .fr{grid-template-columns:1fr}
+  table{font-size:11.5px}
+  thead th{font-size:9.5px}
+  .sec-ttl{font-size:15px}
+}
+@media(max-width:400px){
+  .kpi-grid{grid-template-columns:1fr}
+  .hdr-left h2{font-size:14px}
+}
 </style>
 </head>
 <body>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -222,6 +271,9 @@ tbody td{padding:11px 0;font-size:12.5px;color:#333}
 
   <!-- HEADER -->
   <header class="hdr">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
     <div class="hdr-left">
       <h2>Olá, Carol e Mônica! 👋</h2>
       <p id="hdr-date"></p>
@@ -1107,6 +1159,43 @@ document.addEventListener('DOMContentLoaded',()=>{
   updateSyncBadge();
   renderDash();
 });
+
+// ════════════════════════════════
+// SIDEBAR MOBILE
+// ════════════════════════════════
+function toggleSidebar(){
+  const sidebar=document.querySelector('.sidebar');
+  const overlay=document.getElementById('sidebar-overlay');
+  const hamburger=document.getElementById('hamburger');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+  hamburger.classList.toggle('open');
+}
+function closeSidebarMobile(){
+  if(window.innerWidth<=768){
+    const sidebar=document.querySelector('.sidebar');
+    const overlay=document.getElementById('sidebar-overlay');
+    const hamburger=document.getElementById('hamburger');
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    hamburger.classList.remove('open');
+  }
+}
+// Fechar sidebar ao clicar em qualquer item de navegação no mobile
+document.querySelectorAll('nav a, .sidebar-bottom a').forEach(a=>{
+  a.addEventListener('click',closeSidebarMobile);
+});
+
+// ════════════════════════════════
+// PWA — SERVICE WORKER
+// ════════════════════════════════
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('service-worker.js')
+      .then(()=>console.log('CME PWA: Service Worker registrado'))
+      .catch(e=>console.log('SW erro:',e));
+  });
+}
 </script>
 </body>
 </html>
