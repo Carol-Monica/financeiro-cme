@@ -164,6 +164,17 @@ tbody td{padding:11px 0;font-size:12.5px;color:#333}
 .toast{position:fixed;bottom:22px;right:22px;background:#1A1A2E;color:#fff;padding:11px 18px;border-radius:13px;font-size:12.5px;font-weight:600;z-index:9999;transform:translateY(80px);opacity:0;transition:.3s;box-shadow:0 8px 24px rgba(0,0,0,.2)}
 .toast.show{transform:translateY(0);opacity:1}
 
+/* ── SYNC ── */
+.btn-sync{background:linear-gradient(135deg,#4AAFFF,#1A7FCC);color:#fff;border:none;padding:7px 15px;border-radius:11px;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;transition:.18s}
+.btn-sync:hover{opacity:.88;transform:translateY(-1px)}
+.btn-sync:disabled{opacity:.55;cursor:default;transform:none}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#4BFFB0;display:inline-block;box-shadow:0 0 0 0 rgba(75,255,176,.4);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(75,255,176,.4)}50%{box-shadow:0 0 0 5px rgba(75,255,176,0)}}
+.sync-info{font-size:10px;color:#9A9AB0;text-align:center;margin-top:4px}
+.gs-modal-url{background:#F5F5FA;border-radius:11px;padding:11px 13px;font-size:12px;color:#555;word-break:break-all;margin:8px 0 14px;font-family:monospace}
+.gs-step{display:flex;gap:10px;margin-bottom:10px;font-size:12.5px;color:#444;line-height:1.5}
+.gs-step-num{width:22px;height:22px;min-width:22px;border-radius:50%;background:#1A1A2E;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
 /* ── RELATORIO TABLE ── */
 .rel-table th{background:#F8F8FC;padding:9px 13px;font-size:10.5px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;text-align:right}
 .rel-table th:first-child{text-align:left}
@@ -196,8 +207,13 @@ tbody td{padding:11px 0;font-size:12.5px;color:#333}
   </nav>
   <div class="sidebar-bottom">
     <ul>
+      <li><a onclick="openGsModal()" id="nav-gs"><span class="ico">☁️</span>Google Sheets</a></li>
       <li><a onclick="exportData()"><span class="ico">💾</span>Exportar dados</a></li>
     </ul>
+    <div id="sync-info-bar" style="display:none;padding:8px 14px 4px;font-size:10.5px;color:#9A9AB0;line-height:1.4">
+      <span class="sync-dot"></span> Conectado<br>
+      <span id="sync-last-txt" style="margin-left:12px"></span>
+    </div>
   </div>
 </aside>
 
@@ -226,6 +242,7 @@ tbody td{padding:11px 0;font-size:12.5px;color:#333}
           <option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
         </select>
       </div>
+      <button id="sync-btn" class="btn-sync" onclick="gsConfig.id?syncFromSheets():openGsModal()" title="Importar dados do Google Sheets">☁️ Sincronizar</button>
       <div class="avatar">CM</div>
     </div>
   </header>
@@ -472,6 +489,41 @@ tbody td{padding:11px 0;font-size:12.5px;color:#333}
   </div>
 </div>
 
+<!-- Google Sheets Config -->
+<div class="ovl" id="m-gs">
+  <div class="modal" style="width:520px">
+    <h3>☁️ Google Sheets — Dados Compartilhados</h3>
+    <p style="font-size:13px;color:#555;margin-bottom:18px;line-height:1.6">Conecte uma planilha do Google Sheets para que Carol e Mônica possam lançar dados juntas de qualquer dispositivo. O dashboard importa os dados automaticamente ao sincronizar.</p>
+
+    <div style="background:#EEF6FF;border-radius:14px;padding:14px 16px;margin-bottom:20px">
+      <div style="font-size:12px;font-weight:700;color:#1A5FAD;margin-bottom:10px">📋 Passo a passo rápido</div>
+      <div class="gs-step"><span class="gs-step-num">1</span><span>Abra o link da planilha modelo e clique em <strong>Arquivo → Fazer uma cópia</strong> para salvar no seu Google Drive.</span></div>
+      <div class="gs-step"><span class="gs-step-num">2</span><span>Copie o ID da planilha — é a parte do URL entre <code>/d/</code> e <code>/edit</code>. Ex: <code style="font-size:11px">1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms</code></span></div>
+      <div class="gs-step"><span class="gs-step-num">3</span><span>Cole o ID abaixo e clique em <strong>Conectar e Sincronizar</strong>.</span></div>
+      <div class="gs-step"><span class="gs-step-num">4</span><span>Para lançar dados, abra a planilha e preencha diretamente. Depois clique em <strong>Sincronizar</strong> no dashboard para ver os dados atualizados.</span></div>
+    </div>
+
+    <div class="fg">
+      <label>ID da Planilha Google Sheets *</label>
+      <input type="text" id="gs-sheet-id" placeholder="Cole aqui o ID da sua planilha...">
+    </div>
+
+    <div id="gs-status" style="display:none;background:#D1FAE5;border-radius:11px;padding:10px 14px;font-size:12.5px;color:#059669;margin-bottom:14px">
+      <strong>✅ Planilha conectada!</strong> <span id="gs-status-txt"></span>
+    </div>
+    <div id="gs-error" style="display:none;background:#FEE2E2;border-radius:11px;padding:10px 14px;font-size:12.5px;color:#DC2626;margin-bottom:14px">
+      ⚠️ <span id="gs-error-txt"></span>
+    </div>
+
+    <div class="mf" style="flex-wrap:wrap;gap:8px">
+      <button class="btn btn-cancel" onclick="closeM('m-gs')">Fechar</button>
+      <button class="btn" style="background:#FEE2E2;color:#DC2626" id="gs-disconnect-btn" onclick="clearGsConfig()" style="display:none">Desconectar</button>
+      <a id="gs-open-link" href="#" target="_blank" class="btn" style="background:#F5F5FA;color:#1A1A2E;display:none;text-decoration:none">📊 Abrir Planilha</a>
+      <button class="btn btn-sync" onclick="saveGsConfig()">☁️ Conectar e Sincronizar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -479,8 +531,107 @@ tbody td{padding:11px 0;font-size:12.5px;color:#333}
 // STORAGE
 // ════════════════════════════════
 const K={ent:'cme_ent',com:'cme_com',sai:'cme_sai',ass:'cme_ass',met:'cme_met'};
+const GS_KEY='cme_gs';
 const ld=k=>{try{return JSON.parse(localStorage.getItem(k))||[]}catch{return[]}};
 const sv=(k,d)=>localStorage.setItem(k,JSON.stringify(d));
+
+// ════════════════════════════════
+// GOOGLE SHEETS INTEGRATION
+// ════════════════════════════════
+let gsConfig=JSON.parse(localStorage.getItem(GS_KEY)||'{}');
+
+function gsBaseUrl(){return`https://docs.google.com/spreadsheets/d/${gsConfig.id}/gviz/tq?tqx=out:csv&sheet=`;}
+
+function parseCsv(text){
+  const rows=[],lines=[];
+  let cur='',inQ=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(c==='"'){if(inQ&&text[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(c==='\n'&&!inQ){lines.push(cur);cur='';}
+    else if(c!=='\r')cur+=c;
+  }
+  if(cur)lines.push(cur);
+  if(lines.length<2)return[];
+  const parseRow=row=>{const f=[];let s='',q=false;for(let i=0;i<row.length;i++){const c=row[i];if(c==='"'){if(q&&row[i+1]==='"'){s+='"';i++;}else q=!q;}else if(c===','&&!q){f.push(s);s='';}else s+=c;}f.push(s);return f;};
+  const hdrs=parseRow(lines[0]);
+  return lines.slice(1).filter(l=>l.trim()).map(l=>{const v=parseRow(l);const o={};hdrs.forEach((h,i)=>o[h]=v[i]||'');return o;});
+}
+
+async function syncFromSheets(){
+  const btn=document.getElementById('sync-btn');
+  if(!gsConfig.id){openM('m-gs');return;}
+  btn.textContent='⟳ Sincronizando...';btn.disabled=true;
+  const tabs=[
+    {name:'ENTRADAS',key:K.ent,cast:r=>({...r,id:+r.id||Date.now(),bruto:+r.bruto||0,taxas:+r.taxas||0})},
+    {name:'COMISSOES',key:K.com,cast:r=>({...r,id:+r.id||Date.now(),valor:+r.valor||0,prazo:+r.prazo||0,vReceb:r.vReceb?+r.vReceb:null})},
+    {name:'SAIDAS',key:K.sai,cast:r=>({...r,id:+r.id||Date.now(),valor:+r.valor||0})},
+    {name:'ASSINATURAS',key:K.ass,cast:r=>({...r,id:+r.id||Date.now(),m:+r.m||0,a:+r.a||0})},
+    {name:'METAS',key:K.met,cast:r=>({...r,id:+r.id||Date.now(),meta:+r.meta||0,real:+r.real||0})},
+  ];
+  let errs=0;const errTabs=[];
+  for(const tab of tabs){
+    try{
+      const resp=await fetch(gsBaseUrl()+tab.name,{cache:'no-store'});
+      if(!resp.ok)throw new Error(`HTTP ${resp.status}`);
+      const txt=await resp.text();
+      if(txt.trim().startsWith('<'))throw new Error('Planilha não pública ou nome de aba incorreto');
+      const rows=parseCsv(txt).map(tab.cast).filter(r=>r.id);
+      sv(tab.key,rows);
+    }catch(e){errs++;errTabs.push(tab.name);console.error(`Erro ${tab.name}:`,e);}
+  }
+  btn.textContent='☁️ Sincronizar';btn.disabled=false;
+  gsConfig.lastSync=new Date().toISOString();
+  localStorage.setItem(GS_KEY,JSON.stringify(gsConfig));
+  updateSyncBadge();
+  if(errs===0){toast('Dados sincronizados com sucesso! ✅');}
+  else{toast(`⚠️ Erro em: ${errTabs.join(', ')} — verifique o Guia de Configuração`);}
+  render(currentView||'dashboard');renderDash();
+}
+
+async function saveGsConfig(){
+  const id=document.getElementById('gs-sheet-id').value.trim();
+  if(!id){alert('Cole o ID da planilha antes de conectar');return;}
+  gsConfig={id};localStorage.setItem(GS_KEY,JSON.stringify(gsConfig));
+  document.getElementById('gs-status').style.display='none';
+  document.getElementById('gs-error').style.display='none';
+  closeM('m-gs');
+  await syncFromSheets();
+}
+
+function clearGsConfig(){
+  if(!confirm('Desconectar o Google Sheets? Os dados já sincronizados permanecem no dashboard.'))return;
+  gsConfig={};localStorage.setItem(GS_KEY,JSON.stringify(gsConfig));
+  updateSyncBadge();toast('Google Sheets desconectado.');
+}
+
+function updateSyncBadge(){
+  const bar=document.getElementById('sync-info-bar');
+  const btn=document.getElementById('sync-btn');
+  if(gsConfig.id){
+    bar.style.display='block';
+    if(gsConfig.lastSync){
+      const d=new Date(gsConfig.lastSync);
+      document.getElementById('sync-last-txt').textContent='Sync: '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' '+d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+    }
+    btn.style.display='flex';
+    // update GS modal if open
+    const st=document.getElementById('gs-status');
+    if(st){st.style.display='block';document.getElementById('gs-status-txt').textContent='ID: '+gsConfig.id.slice(0,20)+'...';}
+    const lnk=document.getElementById('gs-open-link');
+    if(lnk){lnk.href=`https://docs.google.com/spreadsheets/d/${gsConfig.id}/edit`;lnk.style.display='inline-flex';}
+    const disc=document.getElementById('gs-disconnect-btn');
+    if(disc)disc.style.display='inline-flex';
+  }else{
+    bar.style.display='none';
+    btn.style.display='flex';
+  }
+}
+
+function openGsModal(){
+  if(gsConfig.id)document.getElementById('gs-sheet-id').value=gsConfig.id;
+  updateSyncBadge();openM('m-gs');
+}
 
 // ════════════════════════════════
 // STATE
@@ -488,6 +639,7 @@ const sv=(k,d)=>localStorage.setItem(k,JSON.stringify(d));
 let mes=new Date().getMonth()+1, ano=new Date().getFullYear();
 let relPeriod='mensal';
 let chRec=null,chDon=null,chLoj=null,chNic=null;
+let currentView='dashboard';
 
 // ════════════════════════════════
 // HELPERS
@@ -510,6 +662,7 @@ const metaIco=t=>{if(/Receita|Lucro/.test(t))return'💰';if(/Seguidor|Instagram
 // NAVIGATION
 // ════════════════════════════════
 function go(v){
+  currentView=v;
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('active'));
   document.getElementById('v-'+v).classList.add('active');
@@ -951,6 +1104,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       {id:5,tipo:'Reels publicados',cat:'Geral CME',per:'Mai/2026',unid:'Qtd',meta:12,real:0,prazo:''},
     ]);
   }
+  updateSyncBadge();
   renderDash();
 });
 </script>
