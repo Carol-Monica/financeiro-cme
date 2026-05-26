@@ -193,6 +193,28 @@ tbody td{padding:11px 0;font-size:12.5px;color:#333}
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#DDD;border-radius:10px}
 
+/* ── DISTRIBUIÇÃO FINANCEIRA ── */
+.dist-row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.dist-label{font-size:12px;color:#555;min-width:110px;font-weight:600}
+.dist-bar-w{flex:1;height:9px;background:#F0F1F8;border-radius:10px;overflow:hidden}
+.dist-bar-f{height:100%;border-radius:10px;transition:width .8s ease}
+.dist-pct{font-size:11px;color:#9A9AB0;min-width:32px;text-align:right;font-weight:600}
+.dist-val{font-size:12px;font-weight:800;color:#1A1A2E;min-width:82px;text-align:right}
+
+/* ── CALENDÁRIO COMISSÃO ── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
+.cal-dow{text-align:center;font-size:10px;font-weight:700;color:#9A9AB0;padding:5px 0}
+.cal-cell{border-radius:9px;padding:5px 4px;min-height:50px;background:#F8F8FC}
+.cal-cell.cal-empty{background:transparent;min-height:50px}
+.cal-cell.cal-today{background:#FFF9E6;border:1.5px solid #F2C12E}
+.cal-cell.cal-has{background:#EDF9F4}
+.cal-dn{font-size:10.5px;font-weight:700;color:#1A1A2E}
+.cal-dv{font-size:9px;color:#059669;font-weight:700;margin-top:2px;line-height:1.3;word-break:break-all}
+
+/* ── TRÁFEGO DIFF ── */
+.kpi.trf-pos{background:linear-gradient(135deg,#43C59E,#2D9A7A)}
+.kpi.trf-neg{background:linear-gradient(135deg,#F48FA0,#D95F80)}
+
 /* ── HAMBURGER ── */
 .hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;width:38px;height:38px;background:#fff;border:none;border-radius:11px;cursor:pointer;padding:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);flex-shrink:0}
 .hamburger span{display:block;height:2px;background:#1A1A2E;border-radius:2px;transition:.25s}
@@ -252,6 +274,8 @@ tbody td{padding:11px 0;font-size:12.5px;color:#333}
       <li><a onclick="go('assinaturas')" data-v="assinaturas"><span class="ico">🔔</span>Assinaturas</a></li>
       <li><a onclick="go('metas')" data-v="metas"><span class="ico">🎯</span>Metas</a></li>
       <li><a onclick="go('relatorio')" data-v="relatorio"><span class="ico">📊</span>Relatório</a></li>
+      <li><a onclick="go('trafego')" data-v="trafego"><span class="ico">📣</span>Tráfego Pago</a></li>
+      <li><a onclick="go('comissao')" data-v="comissao"><span class="ico">💹</span>Comissão</a></li>
     </ul>
   </nav>
   <div class="sidebar-bottom">
@@ -333,6 +357,14 @@ tbody td{padding:11px 0;font-size:12.5px;color:#333}
         <div id="metas-dash"></div>
       </div>
     </div>
+    <!-- Distribuição Financeira -->
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-hdr">
+        <span class="card-ttl">💼 Distribuição Financeira Recomendada</span>
+        <span class="badge-btn" id="dist-total-lbl">100% das Entradas</span>
+      </div>
+      <div id="dist-bars" style="padding:4px 0"></div>
+    </div>
   </div>
 
   <!-- ═══ ENTRADAS ═══ -->
@@ -385,6 +417,38 @@ tbody td{padding:11px 0;font-size:12.5px;color:#333}
       <div class="kpi p"><div class="kpi-ico">📉</div><div class="kpi-lbl">Abaixo da Meta</div><div class="kpi-val" id="k-m-ab">0</div></div>
     </div>
     <div id="metas-list"></div>
+  </div>
+
+  <!-- ═══ TRÁFEGO PAGO ═══ -->
+  <div id="v-trafego" class="view">
+    <div class="sec-hdr"><div><div class="sec-ttl">Tráfego Pago</div><div class="sec-sub">Controle de investimentos em divulgação paga</div></div><button class="btn btn-dark" onclick="openM('m-sai');document.getElementById('s-cat').value='Tráfego Pago';toggleCanalField()">+ Registrar Gasto</button></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
+      <div class="kpi b"><div class="kpi-ico">💡</div><div class="kpi-lbl">Disponível (30% Entradas)</div><div class="kpi-val" id="k-trf-disp">R$ 0,00</div><div class="kpi-chg">orçamento do mês</div></div>
+      <div class="kpi p"><div class="kpi-ico">📣</div><div class="kpi-lbl">Total Investido</div><div class="kpi-val" id="k-trf-inv">R$ 0,00</div><div class="kpi-chg">gastos em tráfego</div></div>
+      <div class="kpi trf-pos" id="k-trf-diff-card"><div class="kpi-ico" id="k-trf-diff-ico">✅</div><div class="kpi-lbl">Saldo de Tráfego</div><div class="kpi-val" id="k-trf-diff">R$ 0,00</div><div class="kpi-chg" id="k-trf-diff-s">dentro do orçamento</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-ttl">Investimento por Canal</span><span class="badge-btn">Este mês</span></div>
+      <div style="height:240px"><canvas id="ch-traf"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ═══ COMISSÃO ═══ -->
+  <div id="v-comissao" class="view">
+    <div class="sec-hdr"><div><div class="sec-ttl">Comissão</div><div class="sec-sub">Acompanhamento de vendas e comissões por dia</div></div></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
+      <div class="kpi gold" style="cursor:pointer" onclick="editMetaCom('diaria')" title="Clique para editar"><div class="kpi-ico">🎯</div><div class="kpi-lbl">Meta Diária</div><div class="kpi-val" id="k-com-meta-d">R$ 0,00</div><div class="kpi-chg">✏️ clique para editar</div></div>
+      <div class="kpi purple" style="cursor:pointer" onclick="editMetaCom('mensal')" title="Clique para editar"><div class="kpi-ico">📅</div><div class="kpi-lbl">Meta Mensal</div><div class="kpi-val" id="k-com-meta-m">R$ 0,00</div><div class="kpi-chg">✏️ clique para editar</div></div>
+      <div class="kpi g"><div class="kpi-ico">📊</div><div class="kpi-lbl">Média Diária Real</div><div class="kpi-val" id="k-com-media">R$ 0,00</div><div class="kpi-chg" id="k-com-media-s">este mês</div></div>
+    </div>
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-hdr"><span class="card-ttl">📅 Calendário de Comissões</span><span class="badge-btn" id="cal-mes-lbl">—</span></div>
+      <div id="com-cal"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-ttl">📈 Crescimento Diário de Vendas</span><span class="badge-btn">Este mês</span></div>
+      <div style="height:200px"><canvas id="ch-com-linha"></canvas></div>
+    </div>
   </div>
 
   <!-- ═══ RELATÓRIO ═══ -->
@@ -475,8 +539,10 @@ tbody td{padding:11px 0;font-size:12.5px;color:#333}
     <div class="fr">
       <div class="fg"><label>Data *</label><input type="date" id="s-data"></div>
       <div class="fg"><label>Categoria *</label>
-        <select id="s-cat"><option>Salários/Pró-labore</option><option>Assinaturas</option><option>Equipamentos</option><option>Produtos para Teste</option><option>Tráfego Pago</option><option>Serviços Terceiros</option><option>Impostos/DAS</option><option>Marketing</option><option>Outros</option></select></div>
+        <select id="s-cat" onchange="toggleCanalField()"><option>Salários/Pró-labore</option><option>Assinaturas</option><option>Equipamentos</option><option>Produtos para Teste</option><option>Tráfego Pago</option><option>Serviços Terceiros</option><option>Impostos/DAS</option><option>Marketing</option><option>Outros</option></select></div>
     </div>
+    <div class="fg" id="s-canal-wrap" style="display:none"><label>Canal de Tráfego</label>
+      <select id="s-canal"><option>Meta (Instagram e Facebook)</option><option>Turbinar (Instagram)</option><option>Promover (TikTok)</option><option>Pinterest Ads</option><option>Sorteios</option><option>Outros</option></select></div>
     <div class="fr">
       <div class="fg"><label>Nicho Relacionado</label>
         <select id="s-nicho"><option value="">Geral</option><option>Baby</option><option>Home</option><option>Kids</option><option>Beauty/Mulher</option><option>Book</option><option>Ele</option></select></div>
@@ -690,8 +756,9 @@ function openGsModal(){
 // ════════════════════════════════
 let mes=new Date().getMonth()+1, ano=new Date().getFullYear();
 let relPeriod='mensal';
-let chRec=null,chDon=null,chLoj=null,chNic=null;
+let chRec=null,chDon=null,chLoj=null,chNic=null,chTraf=null,chComL=null;
 let currentView='dashboard';
+const K_COM_META='cme_com_meta';
 
 // ════════════════════════════════
 // HELPERS
@@ -729,6 +796,8 @@ function render(v){
   if(v==='assinaturas')renderAss();
   if(v==='metas')renderMet();
   if(v==='relatorio')renderRel();
+  if(v==='trafego')renderTrafego();
+  if(v==='comissao')renderComissao();
 }
 function updateFilters(){
   mes=parseInt(document.getElementById('sel-mes').value);
@@ -799,6 +868,9 @@ function renderDash(){
       <td style="color:#9A9AB0">${fdt(e.data)}</td>
       <td class="amt-pos">${brl((+e.bruto)-(+e.taxas||0))}</td></tr>`).join('')
     :'<tr><td colspan="4" style="text-align:center;color:#9A9AB0;padding:22px">Nenhuma entrada registrada ainda</td></tr>';
+
+  // Distribution chart
+  renderDist(totE);
 
   // Goals dash
   const mets=ld(K.met).slice(0,4);
@@ -1000,6 +1072,135 @@ function updMeta(id){
 }
 
 // ════════════════════════════════
+// DISTRIBUIÇÃO FINANCEIRA
+// ════════════════════════════════
+function renderDist(totE){
+  const el=document.getElementById('dist-bars');
+  if(!el)return;
+  const distCats=[
+    {lbl:'🏠 Essenciais',pct:.55,clr:'#43C59E'},
+    {lbl:'📣 Tráfego Pago',pct:.30,clr:'#D95F80'},
+    {lbl:'🏦 Patrimônio',pct:.10,clr:'#6EB5F7'},
+    {lbl:'📚 Educação',pct:.05,clr:'#F9D573'},
+  ];
+  const mNms=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  document.getElementById('dist-total-lbl').textContent=totE>0?brl(totE)+' — '+mNms[mes-1]+'/'+ano:'sem entradas';
+  el.innerHTML=totE>0
+    ?distCats.map(c=>`<div class="dist-row">
+        <div class="dist-label">${c.lbl}</div>
+        <div class="dist-bar-w"><div class="dist-bar-f" style="width:${c.pct*100}%;background:${c.clr}"></div></div>
+        <div class="dist-pct">${Math.round(c.pct*100)}%</div>
+        <div class="dist-val">${brl(totE*c.pct)}</div>
+      </div>`).join('')
+    :'<p style="color:#9A9AB0;font-size:13px;text-align:center;padding:18px">Lance entradas para ver a distribuição financeira recomendada.</p>';
+}
+
+// ════════════════════════════════
+// TRÁFEGO PAGO
+// ════════════════════════════════
+function renderTrafego(){
+  const ents=ld(K.ent),sais=ld(K.sai);
+  const totE=ents.filter(e=>inPer(e.data,mes,ano)).reduce((s,e)=>s+(+e.bruto-(+e.taxas||0)),0);
+  const disp=totE*0.30;
+  const trfSais=sais.filter(s=>inPer(s.data,mes,ano)&&s.cat==='Tráfego Pago');
+  const inv=trfSais.reduce((s,x)=>s+(+x.valor||0),0);
+  const diff=disp-inv;
+  document.getElementById('k-trf-disp').textContent=brl(disp);
+  document.getElementById('k-trf-inv').textContent=brl(inv);
+  document.getElementById('k-trf-diff').textContent=brl(Math.abs(diff));
+  const card=document.getElementById('k-trf-diff-card');
+  card.className='kpi '+(diff>=0?'trf-pos':'trf-neg');
+  document.getElementById('k-trf-diff-ico').textContent=diff>=0?'✅':'⚠️';
+  document.getElementById('k-trf-diff-s').textContent=diff>=0?`R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})} de sobra`:'acima do orçamento!';
+
+  const canais=['Meta (Instagram e Facebook)','Turbinar (Instagram)','Promover (TikTok)','Pinterest Ads','Sorteios','Outros'];
+  const canaisLbl=['Meta','Turbinar','Promover\n(TikTok)','Pinterest\nAds','Sorteios','Outros'];
+  const canaisClr=['#3b5998','#E1306C','#69C9D0','#E60023','#F9D573','#9A9AB0'];
+  const canaisD=canais.map(c=>trfSais.filter(s=>s.canal===c).reduce((a,x)=>a+(+x.valor||0),0));
+  if(chTraf)chTraf.destroy();
+  chTraf=new Chart(document.getElementById('ch-traf').getContext('2d'),{
+    type:'bar',
+    data:{labels:canaisLbl,datasets:[{data:canaisD,backgroundColor:canaisClr,borderRadius:8,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+brl(c.raw)}}},
+      scales:{y:{beginAtZero:true,grid:{color:'#F5F5FA'},ticks:{font:{size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')}},
+              x:{grid:{display:false},ticks:{font:{size:9}}}}}
+  });
+}
+
+function toggleCanalField(){
+  const cat=document.getElementById('s-cat').value;
+  document.getElementById('s-canal-wrap').style.display=cat==='Tráfego Pago'?'block':'none';
+}
+
+// ════════════════════════════════
+// COMISSÃO (CALENDÁRIO + LINHA)
+// ════════════════════════════════
+function renderComissao(){
+  const ents=ld(K.ent);
+  const comMeta=JSON.parse(localStorage.getItem(K_COM_META)||'{"diaria":0,"mensal":0}');
+  const comEnt=ents.filter(e=>inPer(e.data,mes,ano)&&e.tipo==='Comissão');
+  document.getElementById('k-com-meta-d').textContent=brl(comMeta.diaria);
+  document.getElementById('k-com-meta-m').textContent=brl(comMeta.mensal);
+
+  // Agrupar por dia
+  const daysInMonth=new Date(ano,mes,0).getDate();
+  const byDay={};
+  comEnt.forEach(e=>{
+    const d=parseInt(e.data.split('-')[2]);
+    byDay[d]=(byDay[d]||0)+(+e.bruto-(+e.taxas||0));
+  });
+
+  // Média diária (só dias com vendas)
+  const daysWithData=Object.keys(byDay).length;
+  const totCom=Object.values(byDay).reduce((a,b)=>a+b,0);
+  const media=daysWithData>0?totCom/daysWithData:0;
+  document.getElementById('k-com-media').textContent=brl(media);
+  document.getElementById('k-com-media-s').textContent=daysWithData>0?`média de ${daysWithData} dia(s) com vendas`:'nenhuma comissão ainda';
+
+  // Calendário
+  const mNms=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('cal-mes-lbl').textContent=mNms[mes-1]+'/'+ano;
+  const firstDay=new Date(ano,mes-1,1).getDay();
+  const today=new Date();
+  const todayD=(today.getFullYear()===ano&&today.getMonth()+1===mes)?today.getDate():0;
+  const dows=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  let calHtml=`<div class="cal-grid">${dows.map(d=>`<div class="cal-dow">${d}</div>`).join('')}`;
+  for(let i=0;i<firstDay;i++)calHtml+=`<div class="cal-cell cal-empty"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const v=byDay[d]||0;
+    const cls=d===todayD?'cal-today':v>0?'cal-has':'';
+    calHtml+=`<div class="cal-cell ${cls}"><div class="cal-dn">${d}</div>${v>0?`<div class="cal-dv">${brl(v)}</div>`:''}</div>`;
+  }
+  calHtml+='</div>';
+  document.getElementById('com-cal').innerHTML=calHtml;
+
+  // Gráfico de linha diário
+  const labels=Array.from({length:daysInMonth},(_,i)=>i+1);
+  const data=labels.map(d=>byDay[d]||0);
+  if(chComL)chComL.destroy();
+  chComL=new Chart(document.getElementById('ch-com-linha').getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[{label:'Comissão',data,borderColor:'#F2C12E',backgroundColor:'rgba(242,193,46,.13)',borderWidth:2.5,fill:true,tension:.3,pointBackgroundColor:'#F2C12E',pointRadius:4,pointHoverRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+brl(c.raw)}}},
+      scales:{y:{beginAtZero:true,grid:{color:'#F5F5FA'},ticks:{font:{size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')}},
+              x:{grid:{display:false},ticks:{font:{size:9},maxTicksLimit:16}}}}
+  });
+}
+
+function editMetaCom(tipo){
+  const comMeta=JSON.parse(localStorage.getItem(K_COM_META)||'{"diaria":0,"mensal":0}');
+  const lbl=tipo==='diaria'?'Meta Diária (R$):':'Meta Mensal (R$):';
+  const v=prompt(lbl,comMeta[tipo]);
+  if(v===null)return;
+  comMeta[tipo]=parseFloat(v)||0;
+  localStorage.setItem(K_COM_META,JSON.stringify(comMeta));
+  renderComissao();
+  toast(tipo==='diaria'?'Meta diária atualizada! 🎯':'Meta mensal atualizada! 📅');
+}
+
+// ════════════════════════════════
 // RELATÓRIO
 // ════════════════════════════════
 function setPeriod(p,btn){
@@ -1087,8 +1288,9 @@ function saveSai(){
   const data=document.getElementById('s-data').value,desc=document.getElementById('s-desc').value,valor=document.getElementById('s-valor').value;
   if(!data||!desc||!valor){alert('Preencha os campos obrigatórios (*)');return}
   const sais=ld(K.sai);
-  sais.push({id:Date.now(),data,cat:document.getElementById('s-cat').value,nicho:document.getElementById('s-nicho').value,desc,forn:document.getElementById('s-forn').value,valor:parseFloat(valor),rec:document.getElementById('s-rec').value});
-  sv(K.sai,sais);closeM('m-sai');clearFg('m-sai');toast('Saída registrada! 💸');renderDash();renderSai();
+  const cat=document.getElementById('s-cat').value;
+  sais.push({id:Date.now(),data,cat,nicho:document.getElementById('s-nicho').value,desc,forn:document.getElementById('s-forn').value,valor:parseFloat(valor),rec:document.getElementById('s-rec').value,canal:cat==='Tráfego Pago'?document.getElementById('s-canal').value:''});
+  sv(K.sai,sais);closeM('m-sai');clearFg('m-sai');document.getElementById('s-canal-wrap').style.display='none';toast('Saída registrada! 💸');renderDash();renderSai();
 }
 function saveAss(){
   const plat=document.getElementById('a-plat').value;
