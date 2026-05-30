@@ -1,4 +1,4 @@
-const CACHE = 'cme-v1';
+const CACHE = 'cme-v3';
 const ASSETS = [
   './',
   './index.html',
