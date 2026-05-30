@@ -8,56 +8,61 @@ const Df = window.CME_DATA;
 const fmtF = window.fmtBRL;
 
 /* ------------------------------------------------------------
-   Tráfego × Conversão por nicho (barras pareadas) — full width
+   Tráfego × Conversão por nicho — barras horizontais
    ------------------------------------------------------------ */
-function TrafegoConversao({ width = 1040, height = 240 }) {
-  const padL = 44, padR = 20, padT = 18, padB = 56;
-  const w = width - padL - padR;
-  const h = height - padT - padB;
+function TrafegoConversao() {
   const cats = [
-    { c: 'Baby',  v: 84, t: 62, color: '#D97B8A' },
-    { c: 'Geral', v: 72, t: 54, color: '#F2C12E' },
-    { c: 'Book',  v: 46, t: 32, color: '#8A9E6E' },
+    { c: 'Baby',  cliques: 3480 * 0.44, conv: 2560 * 0.45, color: '#D97B8A' },
+    { c: 'Geral', cliques: 3480 * 0.38, conv: 2560 * 0.38, color: '#F2C12E' },
+    { c: 'Book',  cliques: 3480 * 0.18, conv: 2560 * 0.17, color: '#8A9E6E' },
   ];
-  const max = 100;
-  const slot = w / cats.length;
-  const barW = 28;
-  const gap = 6;
+  const maxVal = Math.max(...cats.map(d => d.cliques));
+
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} style={{display:'block'}}>
-      {/* gridlines */}
-      {[0, 0.5, 1].map((t, i) => (
-        <g key={i}>
-          <line x1={padL} x2={width - padR} y1={padT + h - t*h} y2={padT + h - t*h} stroke="var(--hairline)"/>
-          <text x={padL - 10} y={padT + h - t*h + 3} textAnchor="end" fontFamily="var(--font-ui)" fontSize="10" fill="var(--ink-muted)" fontWeight="600">
-            {Math.round(t * 100)}%
-          </text>
-        </g>
-      ))}
-      {cats.map((d, i) => {
-        const cx = padL + slot * i + slot / 2;
-        const hV = (d.v / max) * h;
-        const hT = (d.t / max) * h;
-        const taxa = Math.round((d.t / d.v) * 100);
-        return (
-          <g key={i}>
-            <rect x={cx - barW - gap/2} y={padT + h - hV} width={barW} height={hV} rx="5" fill={d.color}/>
-            <rect x={cx + gap/2} y={padT + h - hT} width={barW} height={hT} rx="5" fill={d.color} opacity="0.35"/>
-            <text x={cx} y={padT + h + 18} textAnchor="middle" fontFamily="var(--font-ui)" fontSize="12" fill="var(--ink)" fontWeight="700">{d.c}</text>
-            <text x={cx} y={padT + h + 34} textAnchor="middle" fontFamily="var(--font-ui)" fontSize="10.5" fill="var(--ink-muted)" fontWeight="600" letterSpacing="0.04em">
-              {taxa}% conv.
-            </text>
-          </g>
-        );
-      })}
-      {/* legend */}
-      <g transform={`translate(${width - padR - 200},${padT - 6})`}>
-        <rect x="0" y="0" width="10" height="10" rx="2" fill="#9a9aac"/>
-        <text x="16" y="9" fontFamily="var(--font-ui)" fontSize="10.5" fill="var(--ink-muted)" fontWeight="600">Cliques</text>
-        <rect x="80" y="0" width="10" height="10" rx="2" fill="#9a9aac" opacity="0.35"/>
-        <text x="96" y="9" fontFamily="var(--font-ui)" fontSize="10.5" fill="var(--ink-muted)" fontWeight="600">Conversões</text>
-      </g>
-    </svg>
+    <div style={{width:'100%'}}>
+      {/* Legenda */}
+      <div style={{display:'flex',gap:16,marginBottom:14,fontSize:11.5,color:'var(--ink-muted)',fontWeight:600}}>
+        <span style={{display:'flex',alignItems:'center',gap:5}}>
+          <span style={{width:10,height:10,borderRadius:3,background:'var(--ink-muted)',display:'inline-block'}}/>
+          Cliques
+        </span>
+        <span style={{display:'flex',alignItems:'center',gap:5}}>
+          <span style={{width:10,height:10,borderRadius:3,background:'var(--ink-muted)',opacity:0.35,display:'inline-block'}}/>
+          Conversões
+        </span>
+      </div>
+
+      {/* Barras por nicho */}
+      <div style={{display:'flex',flexDirection:'column',gap:18}}>
+        {cats.map((d,i) => {
+          const taxa = Math.round((d.conv / d.cliques) * 100);
+          const pctCliques = (d.cliques / maxVal) * 100;
+          const pctConv    = (d.conv    / maxVal) * 100;
+          return (
+            <div key={i}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
+                <span style={{fontWeight:700,fontSize:13,color:'var(--ink)'}}>{d.c}</span>
+                <span style={{fontSize:11.5,color:'var(--ink-muted)',fontWeight:600}}>{taxa}% conversão</span>
+              </div>
+              {/* Barra cliques */}
+              <div style={{marginBottom:5}}>
+                <div style={{height:12,borderRadius:6,background:'var(--paper-warm)',overflow:'hidden'}}>
+                  <div style={{height:'100%',width:`${pctCliques}%`,background:d.color,borderRadius:6,transition:'width .5s'}}/>
+                </div>
+                <div style={{fontSize:10.5,color:'var(--ink-muted)',marginTop:2}}>{Math.round(d.cliques).toLocaleString('pt-BR')} cliques</div>
+              </div>
+              {/* Barra conversões */}
+              <div>
+                <div style={{height:12,borderRadius:6,background:'var(--paper-warm)',overflow:'hidden'}}>
+                  <div style={{height:'100%',width:`${pctConv}%`,background:d.color,opacity:0.45,borderRadius:6,transition:'width .5s'}}/>
+                </div>
+                <div style={{fontSize:10.5,color:'var(--ink-muted)',marginTop:2}}>{Math.round(d.conv).toLocaleString('pt-BR')} conversões</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

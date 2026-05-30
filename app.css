@@ -1370,3 +1370,49 @@ button { font: inherit; cursor: pointer; }
   display: flex; align-items: center; gap: 10px;
 }
 .sync-error-bar a { color: var(--cme-rose); font-weight: 600; }
+
+/* ============================================================
+   Mobile: botão sync no top bar
+   ============================================================ */
+.mob-sync {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(217,95,128,.1); border: none; cursor: pointer;
+  color: var(--cme-rose); transition: background var(--dur-fast);
+}
+.mob-sync:hover { background: rgba(217,95,128,.18); }
+.mob-sync.is-syncing { opacity: .6; cursor: not-allowed; }
+
+/* ============================================================
+   Drawer "Mais" mobile
+   ============================================================ */
+.mais-drawer {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,.35);
+  display: flex; align-items: flex-end;
+  animation: fadeIn .15s ease;
+}
+.mais-list {
+  width: 100%; background: var(--paper); border-radius: 20px 20px 0 0;
+  padding: 16px 16px 32px;
+  display: flex; flex-direction: column; gap: 4px;
+  box-shadow: 0 -4px 24px rgba(0,0,0,.12);
+}
+.mais-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 16px; border-radius: 12px;
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-ui); font-size: 15px; font-weight: 600;
+  color: var(--ink); text-align: left; transition: background .15s;
+}
+.mais-item:hover, .mais-item.is-active { background: var(--paper-warm); color: var(--cme-rose); }
+
+/* ============================================================
+   Resumo 2026 — responsivo (evita overflow mobile)
+   ============================================================ */
+@media (max-width: 600px) {
+  .resumo-grid { grid-template-columns: 1fr; gap: 12px; }
+  .resumo-cell { border-left: none; border-top: 1px solid var(--hairline); padding: 12px 0 0; }
+  .resumo-cell:first-child { border-top: none; padding-top: 0; }
+  .resumo-cell .num { font-size: 20px; }
+}
