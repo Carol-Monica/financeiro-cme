@@ -1315,3 +1315,58 @@ button { font: inherit; cursor: pointer; }
 .density-compact .tbl tbody td { padding: 9px 10px; }
 .density-compact .topbar { margin-bottom: 20px; }
 .density-compact .kpi-row, .density-compact .grid-2 { margin-bottom: 16px; }
+
+/* ============================================================
+   Period picker dropdown + Sync button states
+   ============================================================ */
+.period-wrap { position: relative; }
+
+.period-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 200;
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  min-width: 130px;
+  overflow: hidden;
+  animation: fadeIn var(--dur-fast) var(--ease-out);
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
+
+.pd-item {
+  display: block; width: 100%;
+  padding: 9px 14px;
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-ui); font-size: 13px; font-weight: 500;
+  color: var(--ink-soft); text-align: left;
+  transition: background var(--dur-fast);
+}
+.pd-item:hover { background: var(--paper-warm); color: var(--ink); }
+.pd-item.is-active { color: var(--cme-rose); font-weight: 700; background: rgba(217,95,128,.07); }
+
+.pd-empty {
+  padding: 10px 14px;
+  font-size: 12px; color: var(--ink-muted); font-style: italic;
+}
+
+/* Spin animation for sync icon */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin .8s linear infinite; display:inline-block; }
+
+/* Syncing button state */
+.btn.is-syncing { opacity: .7; cursor: not-allowed; }
+
+/* Sync error bar */
+.sync-error-bar {
+  margin-top: 10px;
+  padding: 8px 14px;
+  background: rgba(217,95,128,.1);
+  border: 1px solid rgba(217,95,128,.25);
+  border-radius: var(--radius-sm);
+  font-size: 12px; color: #b03060;
+  display: flex; align-items: center; gap: 10px;
+}
+.sync-error-bar a { color: var(--cme-rose); font-weight: 600; }

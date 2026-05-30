@@ -129,9 +129,37 @@ function Sidebar({ active = 'dashboard', onNav }) {
 window.Sidebar = Sidebar;
 
 /* ============================================================
-   Topbar
+   Topbar — conectado ao CMEAppContext (sync + período)
    ============================================================ */
-function Topbar({ title, eyebrow, sub, periodMonth = 'Maio', periodYear = 2026, primaryAction = null }) {
+function Topbar({ title, eyebrow, sub, primaryAction = null }) {
+  const ctx = React.useContext(window.CMEAppContext || React.createContext({}));
+  const data = window.CME_DATA;
+
+  // Labels do período atual
+  const MN = window.MONTH_NAMES || ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mLabel = ctx.period ? MN[ctx.period.monthIdx] : (data?.period?.month || 'Maio');
+  const yLabel = ctx.period ? ctx.period.year          : (data?.period?.year  || 2026);
+
+  const [showMonth, setShowMonth] = React.useState(false);
+  const [showYear,  setShowYear]  = React.useState(false);
+
+  const periods  = ctx.availablePeriods || [];
+  const years    = [...new Set(periods.map(p => p.year))].sort((a,b)=>b-a);
+
+  // Fecha dropdowns ao clicar fora
+  React.useEffect(() => {
+    if (!showMonth && !showYear) return;
+    const close = () => { setShowMonth(false); setShowYear(false); };
+    document.addEventListener('click', close, true);
+    return () => document.removeEventListener('click', close, true);
+  }, [showMonth, showYear]);
+
+  const selectPeriod = (p) => { ctx.setPeriod && ctx.setPeriod(p); setShowMonth(false); setShowYear(false); };
+  const selectYear   = (y) => {
+    const yp = periods.filter(p => p.year === y);
+    if (yp.length > 0) selectPeriod(yp[0]);
+  };
+
   return (
     <header className="topbar">
       <div className="topbar-greet">
@@ -140,20 +168,78 @@ function Topbar({ title, eyebrow, sub, periodMonth = 'Maio', periodYear = 2026, 
         {sub && <div className="topbar-sub">{sub}</div>}
       </div>
       <div className="topbar-controls">
-        <button className="period-pill">
-          <Icons.cal size={14}/>
-          <span className="label">Mês</span>
-          <span>{periodMonth}</span>
-          <Icons.chev size={14} className="chev"/>
+
+        {/* ── Seletor de Mês ── */}
+        <div className="period-wrap" onClick={e => e.stopPropagation()}>
+          <button className="period-pill" onClick={() => { setShowMonth(v=>!v); setShowYear(false); }}>
+            <Icons.cal size={14}/>
+            <span className="label">Mês</span>
+            <span>{mLabel}</span>
+            <Icons.chev size={14} className="chev"/>
+          </button>
+          {showMonth && (
+            <div className="period-dropdown">
+              {periods.length === 0
+                ? <div className="pd-empty">Sincronize para ver períodos disponíveis</div>
+                : periods.map(p => (
+                    <button key={`${p.year}-${p.monthIdx}`}
+                      className={'pd-item' + (ctx.period?.monthIdx===p.monthIdx && ctx.period?.year===p.year ? ' is-active' : '')}
+                      onClick={() => selectPeriod(p)}>
+                      {MN[p.monthIdx]}/{p.year}
+                    </button>
+                  ))
+              }
+            </div>
+          )}
+        </div>
+
+        {/* ── Seletor de Ano ── */}
+        <div className="period-wrap" onClick={e => e.stopPropagation()}>
+          <button className="period-pill" onClick={() => { setShowYear(v=>!v); setShowMonth(false); }}>
+            <span className="label">Ano</span>
+            <span>{yLabel}</span>
+            <Icons.chev size={14} className="chev"/>
+          </button>
+          {showYear && (
+            <div className="period-dropdown">
+              {years.length === 0
+                ? <div className="pd-empty">Sincronize para ver anos disponíveis</div>
+                : years.map(y => (
+                    <button key={y}
+                      className={'pd-item' + (ctx.period?.year===y ? ' is-active' : '')}
+                      onClick={() => selectYear(y)}>
+                      {y}
+                    </button>
+                  ))
+              }
+            </div>
+          )}
+        </div>
+
+        {/* ── Botão Sincronizar ── */}
+        <button
+          className={'btn btn-ghost' + (ctx.isSyncing ? ' is-syncing' : '')}
+          onClick={ctx.sync}
+          disabled={ctx.isSyncing}
+          title={ctx.syncError ? `Erro: ${ctx.syncError}` : (ctx.lastSync ? `Última sync: ${ctx.lastSync.toLocaleTimeString('pt-BR')}` : 'Clique para sincronizar com o Google Sheets')}>
+          <Icons.refresh size={14} className={ctx.isSyncing ? 'spin' : ''}/>
+          {ctx.isSyncing ? 'Sincronizando…' : 'Sincronizar'}
         </button>
-        <button className="period-pill">
-          <span className="label">Ano</span>
-          <span>{periodYear}</span>
-          <Icons.chev size={14} className="chev"/>
-        </button>
-        <button className="btn btn-ghost"><Icons.refresh size={14}/>Sincronizar</button>
-        {primaryAction || <button className="btn btn-primary"><Icons.plus size={14}/>{ 'Nova Entrada' }</button>}
+
+        {primaryAction || <button className="btn btn-primary"><Icons.plus size={14}/>Nova Entrada</button>}
       </div>
+
+      {/* Faixa de erro de sincronização */}
+      {ctx.syncError && (
+        <div className="sync-error-bar">
+          ⚠️ {ctx.syncError}
+          {ctx.syncError.includes('pública') && (
+            <a href="https://support.google.com/docs/answer/183965" target="_blank" rel="noopener noreferrer">
+              Como tornar pública →
+            </a>
+          )}
+        </div>
+      )}
     </header>
   );
 }
