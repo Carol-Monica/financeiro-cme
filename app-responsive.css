@@ -1,0 +1,162 @@
+/* ============================================================
+   CME Financeiro — RESPONSIVE layer (container queries)
+   Cada página é envolvida por .page-cq (container: pageshell).
+   A mesma estrutura serve desktop e PWA mobile.
+   ============================================================ */
+
+.page-cq {
+  container: pageshell / inline-size;
+  width: 100%;
+  height: 100%;
+}
+
+.rs-shell { position: relative; }
+
+/* título reivindica o espaço disponível (evita colapsar quando os controles são largos) */
+.page-cq .topbar-greet { flex: 1 1 auto; min-width: 0; }
+
+/* No canvas (artboards estáticos) a sidebar não deve ser travada por 100vh,
+   senão o grupo "Crescimento" + rodapé são cortados em telas curtas.
+   Aqui ela acompanha a altura do shell e rola internamente se preciso. */
+.page-cq .shell-fem .sb { position: static; top: auto; max-height: 100%; overflow-y: auto; }
+
+/* ----- Mobile chrome: escondido no desktop ----- */
+.rs-mobtop { display: none; }
+.rs-tabbar { display: none; }
+.rs-fab    { display: none; }
+
+/* mobile top app bar */
+.rs-mobtop {
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px 13px;
+  background: #fff;
+  border-bottom: 1px solid var(--hairline);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.rs-mobtop .logo {
+  width: 40px; height: 40px; border-radius: 50%;
+  object-fit: cover; border: 2px solid var(--cme-rose); flex-shrink: 0;
+}
+.rs-mobtop .txt { min-width: 0; flex: 1; }
+.rs-mobtop .t { font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.1; }
+.rs-mobtop .t em { font-style: normal; color: var(--cme-rose); }
+.rs-mobtop .s { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+.rs-mobtop .period {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 11px; border-radius: 999px;
+  background: var(--paper-warm); border: 1px solid var(--hairline);
+  font-size: 12px; font-weight: 600; color: var(--ink); flex-shrink: 0;
+}
+
+/* mobile bottom tab bar */
+.rs-tabbar {
+  position: absolute; left: 12px; right: 12px; bottom: 12px;
+  background: #fff; border-radius: 22px;
+  box-shadow: 0 8px 30px rgba(26,26,46,0.16), 0 0 0 1px rgba(26,26,46,0.04);
+  padding: 8px 6px; gap: 2px; z-index: 6;
+}
+.rs-tabbar .t {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 7px 0; border-radius: 14px; border: 0; background: transparent;
+  font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700;
+  color: var(--ink-muted);
+}
+.rs-tabbar .t.is-active { background: var(--cme-rose); color: #fff; }
+
+/* mobile floating action button */
+.rs-fab {
+  position: absolute; right: 18px; bottom: 86px;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--cme-rose); color: #fff; border: 0;
+  align-items: center; justify-content: center;
+  box-shadow: 0 10px 26px rgba(217,95,128,0.45); z-index: 6;
+}
+
+/* extra KPI row widths */
+.kpi-row-3 { grid-template-columns: repeat(3, 1fr); }
+
+/* generic responsive grids (collapse on mobile) */
+.col2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.col3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.col-32 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
+
+/* ============================================================
+   BREAKPOINT — tablet (≤ 980px container)
+   ============================================================ */
+/* ============================================================
+   BREAKPOINT — intermediário/tablet (≤ 1180px)
+   Topbar empilha (controles abaixo do título) para o headline
+   editorial não colapsar numa coluna estreita.
+   ============================================================ */
+@container pageshell (max-width: 1180px) {
+  .topbar { flex-direction: column; align-items: stretch; gap: 16px; }
+  .topbar-greet { width: 100%; }
+  .topbar-controls { width: 100%; flex-wrap: wrap; }
+  .card-head { flex-wrap: wrap; gap: 10px; }
+}
+
+@container pageshell (max-width: 980px) {
+  .grid-2, .grid-2b { grid-template-columns: 1fr; }
+  .rs-shell .kpi-row-5 { grid-template-columns: repeat(3, 1fr); }
+  .col-32 { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   BREAKPOINT — mobile (≤ 760px container) → modo PWA
+   ============================================================ */
+@container pageshell (max-width: 760px) {
+  .rs-shell {
+    grid-template-columns: 1fr;
+    padding: 0; gap: 0; border-radius: 0;
+    background: #FCE9EF;
+  }
+  .rs-shell > .sb { display: none; }
+  .rs-mobtop { display: flex; }
+  .rs-tabbar { display: flex; }
+  .rs-fab    { display: flex; }
+
+  .main { padding: 16px 14px 104px; }
+
+  /* topbar editorial vira compacto; controles vão pro mobtop */
+  .topbar { flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 18px; }
+  .topbar-controls { display: none; }
+  .topbar-title { font-size: 26px; }
+  .topbar-sub { font-size: 12.5px; }
+
+  .rs-shell .kpi-row, .rs-shell .kpi-row-3, .rs-shell .kpi-row-5 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .col2, .col3 { grid-template-columns: 1fr; }
+  .kpi { padding: 14px 15px; }
+  .kpi-value { font-size: 23px; }
+
+  .card { padding: 16px; }
+
+  /* tabelas .resp viram cards empilhados */
+  .tbl.resp thead { display: none; }
+  .tbl.resp, .tbl.resp tbody, .tbl.resp tr, .tbl.resp td { display: block; width: 100%; }
+  .tbl.resp tr {
+    background: var(--paper); border: 1px solid var(--hairline);
+    border-radius: 14px; padding: 12px 14px; margin-bottom: 10px;
+  }
+  .tbl.resp tr:hover { background: var(--paper); }
+  .tbl.resp td {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    border: 0; padding: 5px 0; text-align: right; min-height: 0;
+  }
+  .tbl.resp td::before {
+    content: attr(data-label);
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-muted); font-weight: 700; text-align: left; flex-shrink: 0;
+  }
+  .tbl.resp td:empty { display: none; }
+  .tbl.resp td.tbl-total::before { content: ''; }
+}
+
+/* ============================================================
+   BREAKPOINT — mobile estreito (≤ 480px) → 1 coluna de KPIs
+   ============================================================ */
+@container pageshell (max-width: 480px) {
+  .rs-shell .kpi-row, .rs-shell .kpi-row-3, .rs-shell .kpi-row-5 { grid-template-columns: 1fr; }
+}

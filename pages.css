@@ -1,0 +1,91 @@
+/* ============================================================
+   CME Financeiro — estilos dos componentes das páginas internas
+   (A Receber · Saídas · Assinaturas · Metas · Relatório · Tráfego · Comissão)
+   ============================================================ */
+
+/* status pill neutro (assinaturas inativas) */
+.sp.flat { background: var(--surface-1); color: var(--ink-muted); }
+
+/* botão de ação na linha (marcar recebido) */
+.row-act {
+  width: 28px; height: 28px; border-radius: 8px;
+  border: 1px solid var(--hairline); background: #fff; color: var(--cme-green);
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: background .14s, color .14s, border-color .14s;
+}
+.row-act:hover { background: var(--cme-green); color: #fff; border-color: transparent; }
+
+/* pill de categoria (saídas) */
+.cat-pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.cat-pill::before { content: ''; width: 8px; height: 8px; border-radius: 3px; background: var(--c, #9a9aac); flex-shrink: 0; }
+
+/* indicador de recorrência */
+.rec-dot { display: inline-flex; color: var(--nicho-ele); }
+
+/* ----- cards de meta ----- */
+.goal-card { display: flex; flex-direction: column; gap: 12px; }
+.goal-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.goal-tipo { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: var(--ink-muted); }
+.goal-title { font-size: 16px; font-weight: 700; color: var(--ink); margin-top: 3px; letter-spacing: -0.01em; }
+.goal-bar { height: 10px; border-radius: 999px; background: var(--surface-1); overflow: hidden; }
+.goal-bar-fill { height: 100%; border-radius: 999px; transition: width .45s var(--ease-out); }
+.goal-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 13px; }
+.goal-pct { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px; }
+.goal-meta-line { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--ink-muted); font-weight: 600; }
+.goal-chip { margin-left: auto; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.04em; }
+.goal-chip.atingida  { background: rgba(45,106,79,0.10);  color: var(--cme-green); }
+.goal-chip.andamento { background: rgba(242,193,46,0.20);  color: #7b5e0d; }
+.goal-chip.abaixo    { background: rgba(224,112,96,0.14);  color: #a8483a; }
+
+/* ----- barras horizontais (relatório: receita por loja/nicho) ----- */
+.hbar-list { display: flex; flex-direction: column; gap: 14px; }
+.hbar { display: grid; grid-template-columns: 96px 1fr 92px; align-items: center; gap: 12px; }
+.hbar .hb-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+.hbar .hb-track { height: 12px; border-radius: 999px; background: var(--surface-1); overflow: hidden; }
+.hbar .hb-fill { height: 100%; border-radius: 999px; transition: width .45s var(--ease-out); }
+.hbar .hb-val { text-align: right; font-variant-numeric: tabular-nums; }
+.hbar .hb-val b { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.hbar .hb-val span { font-size: 11px; color: var(--ink-muted); display: block; }
+
+/* segmented control (relatório período) */
+.seg { display: inline-flex; background: var(--surface-1); border-radius: 12px; padding: 3px; gap: 2px; }
+.seg button {
+  border: 0; background: transparent; padding: 7px 16px; border-radius: 9px;
+  font-size: 12.5px; font-weight: 600; color: var(--ink-muted); font-family: var(--font-ui); cursor: pointer;
+}
+.seg button.is-on { background: #fff; color: var(--ink); box-shadow: 0 1px 4px rgba(26,26,46,0.10); }
+
+/* big resumo numbers (relatório) */
+.resumo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+.resumo-cell { padding: 4px 18px; border-left: 1px solid var(--hairline); }
+.resumo-cell:first-child { border-left: 0; padding-left: 0; }
+.resumo-cell .lbl { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--ink-muted); }
+.resumo-cell .num { font-family: var(--font-ui); font-weight: 700; font-size: 26px; color: var(--ink); letter-spacing: -0.01em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+/* ----- tráfego: card de canal ----- */
+.chan-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid var(--hairline); }
+.chan-row:first-child { border-top: 0; }
+.chan-name { display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.chan-name .dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
+.chan-sub { font-size: 11.5px; color: var(--ink-muted); font-weight: 500; margin-top: 2px; }
+.chan-val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 15px; color: var(--ink); }
+
+/* ----- comissão: calendário ----- */
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.cal-dow { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; color: var(--ink-muted); text-align: center; padding-bottom: 4px; }
+.cal-cell {
+  aspect-ratio: 1 / 1; border-radius: 10px; background: var(--paper-warm);
+  border: 1px solid var(--hairline); padding: 6px 7px;
+  display: flex; flex-direction: column; justify-content: space-between; min-width: 0;
+}
+.cal-cell.empty { background: transparent; border-color: transparent; }
+.cal-cell .d { font-size: 11px; font-weight: 700; color: var(--ink-muted); }
+.cal-cell .v { font-size: 10.5px; font-weight: 700; color: var(--cme-green); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.cal-cell.has { border-color: transparent; }
+.cal-cell.hit { background: rgba(45,106,79,0.12); }
+.cal-cell.hit .d { color: var(--cme-green); }
+.cal-cell.miss { background: rgba(242,193,46,0.14); }
+.cal-cell.today { box-shadow: 0 0 0 2px var(--cme-rose); }
+
+/* editable meta inline (comissão) */
+.edit-meta { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--cme-rose); font-weight: 600; cursor: pointer; }
