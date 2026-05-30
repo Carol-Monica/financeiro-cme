@@ -26,15 +26,22 @@ const MAIS_IDS = RS_MAIS.map(t => t.id);
 function RsMobTop({ label }) {
   const ctx = React.useContext(window.CMEAppContext || React.createContext({}));
   const MN = window.MONTH_NAMES || ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  const mLabel = ctx.period ? MN[ctx.period.monthIdx] : (window.CME_DATA?.period?.month || 'Maio');
-  const [showPicker, setShowPicker] = React.useState(false);
+  const mLabel = ctx.period ? MN[ctx.period.monthIdx] : (window.CME_DATA?.period?.month || 'Mai');
+  const yLabel = ctx.period ? ctx.period.year : (window.CME_DATA?.period?.year || 2026);
+  const [showMonth, setShowMonth] = React.useState(false);
+  const [showYear,  setShowYear]  = React.useState(false);
+  const periods = ctx.availablePeriods || [];
+  const years   = [...new Set(periods.map(p=>p.year))].sort((a,b)=>b-a);
 
   React.useEffect(() => {
-    if (!showPicker) return;
-    const close = () => setShowPicker(false);
+    if (!showMonth && !showYear) return;
+    const close = () => { setShowMonth(false); setShowYear(false); };
     document.addEventListener('click', close, true);
     return () => document.removeEventListener('click', close, true);
-  }, [showPicker]);
+  }, [showMonth, showYear]);
+
+  const selectPeriod = (p) => { ctx.setPeriod&&ctx.setPeriod(p); setShowMonth(false); setShowYear(false); };
+  const selectYear   = (y) => { const yp=periods.filter(p=>p.year===y); if(yp.length) selectPeriod(yp[0]); };
 
   return (
     <div className="rs-mobtop">
@@ -43,21 +50,22 @@ function RsMobTop({ label }) {
         <div className="t">CME · <em>{label}</em></div>
         <div className="s">Carol &amp; Mônica · {ctx.isSyncing ? 'sincronizando…' : 'sincronizado'}</div>
       </div>
-      <div style={{display:'flex',gap:6,alignItems:'center',marginLeft:'auto'}}>
-        {/* Período */}
+      <div style={{display:'flex',gap:5,alignItems:'center',marginLeft:'auto'}}>
+
+        {/* Mês */}
         <div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
-          <button className="period" onClick={()=>setShowPicker(v=>!v)}>
-            <window.Icons.cal size={13}/> {mLabel}
-            <window.Icons.chev size={13}/>
+          <button className="period" onClick={()=>{setShowMonth(v=>!v);setShowYear(false);}}>
+            <window.Icons.cal size={12}/> {mLabel}
+            <window.Icons.chev size={12}/>
           </button>
-          {showPicker && (
+          {showMonth && (
             <div className="period-dropdown" style={{right:0,left:'auto',minWidth:120}}>
-              {(ctx.availablePeriods||[]).length === 0
+              {periods.length===0
                 ? <div className="pd-empty">Sincronize primeiro</div>
-                : (ctx.availablePeriods||[]).map(p => (
+                : periods.map(p=>(
                     <button key={`${p.year}-${p.monthIdx}`}
                       className={'pd-item'+(ctx.period?.monthIdx===p.monthIdx&&ctx.period?.year===p.year?' is-active':'')}
-                      onClick={()=>{ctx.setPeriod&&ctx.setPeriod(p);setShowPicker(false);}}>
+                      onClick={()=>selectPeriod(p)}>
                       {MN[p.monthIdx]}/{p.year}
                     </button>
                   ))
@@ -65,6 +73,28 @@ function RsMobTop({ label }) {
             </div>
           )}
         </div>
+
+        {/* Ano */}
+        <div style={{position:'relative'}} onClick={e=>e.stopPropagation()}>
+          <button className="period" onClick={()=>{setShowYear(v=>!v);setShowMonth(false);}}>
+            {yLabel} <window.Icons.chev size={12}/>
+          </button>
+          {showYear && (
+            <div className="period-dropdown" style={{right:0,left:'auto',minWidth:90}}>
+              {years.length===0
+                ? <div className="pd-empty">Sincronize primeiro</div>
+                : years.map(y=>(
+                    <button key={y}
+                      className={'pd-item'+(ctx.period?.year===y?' is-active':'')}
+                      onClick={()=>selectYear(y)}>
+                      {y}
+                    </button>
+                  ))
+              }
+            </div>
+          )}
+        </div>
+
         {/* Sincronizar */}
         <button className={'mob-sync'+(ctx.isSyncing?' is-syncing':'')}
           onClick={ctx.sync} disabled={ctx.isSyncing}

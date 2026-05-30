@@ -160,3 +160,13 @@
 @container pageshell (max-width: 480px) {
   .rs-shell .kpi-row, .rs-shell .kpi-row-3, .rs-shell .kpi-row-5 { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   Resumo 2026 — fix overflow em mobile (container query)
+   ============================================================ */
+@container pageshell (max-width: 600px) {
+  .resumo-grid { grid-template-columns: 1fr; gap: 10px; }
+  .resumo-cell { border-left: none !important; border-top: 1px solid var(--hairline); padding: 10px 0 0 !important; }
+  .resumo-cell:first-child { border-top: none; padding-top: 0 !important; }
+  .resumo-cell .num { font-size: 19px !important; }
+}
